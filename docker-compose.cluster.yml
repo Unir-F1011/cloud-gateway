@@ -1,0 +1,76 @@
+version: '3.9' 
+
+services:
+  db: 
+    image: postgres:16
+    container_name: db 
+    environment:
+      POSTGRES_DB: operator_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - ms-project 
+  
+  ms-operator:
+    build:
+      context: ./../operator/
+      dockerfile: Dockerfile
+    container_name: ms-operator
+    env_file:
+      - ./operator/.env
+    ports:
+      - "8082:8082" 
+    depends_on:
+      - db 
+      - ms-eureka
+    networks:
+      - ms-project
+
+
+  ms-search:
+    build:
+      context: ./../search/
+      dockerfile: Dockerfile
+    container_name: ms-search
+    env_file:
+      - ./search/.env
+    ports:
+      - "8081:8081"
+    networks:
+      - ms-project
+    depends_on:
+      - ms-eureka
+  
+  ms-eureka:
+    build:
+      context: ./../eureka/ 
+      dockerfile: Dockerfile
+    container_name: ms-eureka
+    env_file:
+      - ./eureka/.env
+    ports:
+      - "8761:8761"
+    networks:
+      - ms-project
+
+  ms-cloud-gateway:
+    build:
+      context: . 
+      dockerfile: Dockerfile
+    container_name: ms-cloud-gateway
+    env_file:
+      - ./cloud-gateway/.env 
+    ports:
+      - "8762:8762"
+    networks:
+      - ms-project
+    depends_on:
+      - ms-eureka
+      - ms-search
+      - ms-operator
+
+
+networks:
+  ms-project:
