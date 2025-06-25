@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile
     container_name: ms-operator
     env_file:
-      - ./operator/.env
+      - ./../operator/.env
     ports:
       - "8082:8082" 
     depends_on:
@@ -35,7 +35,7 @@ services:
       dockerfile: Dockerfile
     container_name: ms-search
     env_file:
-      - ./search/.env
+      - ./../search/.env
     ports:
       - "8081:8081"
     networks:
@@ -49,7 +49,7 @@ services:
       dockerfile: Dockerfile
     container_name: ms-eureka
     env_file:
-      - ./eureka/.env
+      - ./../eureka/.env
     ports:
       - "8761:8761"
     networks:
@@ -61,7 +61,7 @@ services:
       dockerfile: Dockerfile
     container_name: ms-cloud-gateway
     env_file:
-      - ./cloud-gateway/.env 
+      - .env 
     ports:
       - "8762:8762"
     networks:

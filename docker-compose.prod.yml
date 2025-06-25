@@ -1,0 +1,95 @@
+version: '3.9' 
+
+services:
+  db: 
+    image: postgres:16
+    container_name: db 
+    environment:
+      POSTGRES_DB: operator_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - ms-project 
+  
+  ms-operator:
+    image: mbi88/operator:latest
+    container_name: ms-operator
+   
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/operator_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - SERVER_PORT=8082
+      - EUREKA_URL=http://ms-eureka:8761/eureka
+      - SERVER_NAME=ms-operator
+      - SEARCH_SERVER=https://ms-search:8081/items
+
+    ports:
+      - "8082:8082" 
+    depends_on:
+      - db 
+      - ms-eureka
+    networks:
+      - ms-project
+
+
+  ms-search:
+    image: mbi88/search:latest
+    container_name: ms-search
+    
+    environment:
+      - ELASTICSEARCH_HOST=
+      - ELASTICSEARCH_USER=
+      - ELASTICSEARCH_PWD=
+      - EUREKA_URL=http://ms-eureka:8761/eureka
+      - SERVER_PORT=8081
+      - SERVER_NAME=ms-search
+
+    ports:
+      - "8081:8081"
+    networks:
+      - ms-project
+    depends_on:
+      - ms-eureka
+  
+  ms-eureka:
+    image: mbi88/eureka:latest
+    container_name: ms-eureka
+
+    environment:
+      - SERVER_NAME=ms-eureka
+      - SERVER_PORT=8761
+      - EUREKA_HOST=localhost
+      - EUREKA_RENEWAL=0.90
+
+    ports:
+      - "8761:8761"
+    networks:
+      - ms-project
+
+  ms-cloud-gateway:
+    image: mbi88/cloud_gateway:latest
+    container_name: ms-cloud-gateway
+   
+    environment:
+      - SERVER_NAME=ms-cloud-gateway
+      - ALLOWED_ORIGINS="*"
+      - ROUTE_TABLES_ENABLED=true 
+      - SERVER_PORT=8762
+      - EUREKA_URL=http://ms-eureka:8761/eureka
+      - EUREKA_HOST=localhost
+
+    ports:
+      - "8762:8762"
+    networks:
+      - ms-project
+    depends_on:
+      - ms-eureka
+      - ms-search
+      - ms-operator
+
+
+networks:
+  ms-project:
