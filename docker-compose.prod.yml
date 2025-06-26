@@ -8,8 +8,9 @@ services:
       POSTGRES_DB: operator_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
+    
+    expose:
+      - "5432"
     networks:
       - ms-project 
   
@@ -24,10 +25,10 @@ services:
       - SERVER_PORT=8082
       - EUREKA_URL=http://ms-eureka:8761/eureka
       - SERVER_NAME=ms-operator
-      - SEARCH_SERVER=https://ms-search:8081/items
+      - SEARCH_SERVER=https://ms-search:8081/v1/items
 
-    ports:
-      - "8082:8082" 
+    expose:
+      - "8082"
     depends_on:
       - db 
       - ms-eureka
@@ -40,15 +41,16 @@ services:
     container_name: ms-search
     
     environment:
-      - ELASTICSEARCH_HOST=
-      - ELASTICSEARCH_USER=
-      - ELASTICSEARCH_PWD=
+      - ELASTICSEARCH_HOST=unir-search-3107723626.us-east-1.bonsaisearch.net
+      - ELASTICSEARCH_USER=v5fjxazmfs
+      - ELASTICSEARCH_PWD=nixw3719am
       - EUREKA_URL=http://ms-eureka:8761/eureka
       - SERVER_PORT=8081
       - SERVER_NAME=ms-search
+    
 
-    ports:
-      - "8081:8081"
+    expose:
+      - "8081"
     networks:
       - ms-project
     depends_on:
@@ -64,8 +66,8 @@ services:
       - EUREKA_HOST=localhost
       - EUREKA_RENEWAL=0.90
 
-    ports:
-      - "8761:8761"
+    expose:
+      - "8761"
     networks:
       - ms-project
 
@@ -79,7 +81,7 @@ services:
       - ROUTE_TABLES_ENABLED=true 
       - SERVER_PORT=8762
       - EUREKA_URL=http://ms-eureka:8761/eureka
-      - EUREKA_HOST=localhost
+      - EUREKA_HOST=ms-cloud-gateway
 
     ports:
       - "8762:8762"
