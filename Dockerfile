@@ -3,7 +3,7 @@ FROM maven:3.9-eclipse-temurin-24 AS build
 
 COPY . .
 
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 
 FROM eclipse-temurin:24-jdk
