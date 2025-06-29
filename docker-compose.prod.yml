@@ -15,7 +15,7 @@ services:
       - ms-project 
   
   ms-operator:
-    image: mbi88/operator:latest
+    image: mbi8807/operator:latest
     container_name: ms-operator
    
     environment:
@@ -37,7 +37,7 @@ services:
 
 
   ms-search:
-    image: mbi88/search:latest
+    image: mbi8807/search:latest
     container_name: ms-search
     
     environment:
@@ -57,7 +57,7 @@ services:
       - ms-eureka
   
   ms-eureka:
-    image: mbi88/eureka:latest
+    image: mbi8807/eureka:latest
     container_name: ms-eureka
 
     environment:
@@ -72,7 +72,7 @@ services:
       - ms-project
 
   ms-cloud-gateway:
-    image: mbi88/cloud_gateway:latest
+    image: mbi8807/cloud_gateway:latest
     container_name: ms-cloud-gateway
    
     environment:
