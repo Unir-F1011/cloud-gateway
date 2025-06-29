@@ -72,7 +72,7 @@ services:
       - ms-project
 
   ms-cloud-gateway:
-    image: mbi8807/cloud_gateway:latest
+    image: mbi8807/cloud-gateway:latest
     container_name: ms-cloud-gateway
    
     environment:
