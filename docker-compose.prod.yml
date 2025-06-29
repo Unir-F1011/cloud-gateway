@@ -25,7 +25,7 @@ services:
       - SERVER_PORT=8082
       - EUREKA_URL=http://ms-eureka:8761/eureka
       - SERVER_NAME=ms-operator
-      - SEARCH_SERVER=https://ms-search:8081/v1/items
+      - SEARCH_SERVER=http://ms-search:8081/v1/items
 
     expose:
       - "8082"
