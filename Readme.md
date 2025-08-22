@@ -77,6 +77,85 @@ Fragmento relevante (ya existente en `docker-compose.dev.yml` dentro de `cloud-g
 ```
 La red `ms-project` permite que el gateway resuelva los hosts internos (por ejemplo `ms-eureka:8761`).
 
+## Modo de desarrollo recomendado (compose + watch + rebuild)
+Se ha configurado `develop.watch` en el `docker-compose.dev.yml` para que **cada cambio en el código fuente (`src`) provoque un rebuild completo** de la imagen del microservicio correspondiente. Esto garantiza que el código Java se compile de nuevo y evita inconsistencias con DevTools cuando no se generan `.class` nuevos.
+
+### Archivo  `docker-compose.dev.yml`
+```yaml
+
+	ms-operator:
+		develop:
+			watch:
+				- action: rebuild
+					path: ../operator/src
+				- action: rebuild
+					path: ../operator/pom.xml
+
+	ms-search:
+
+		volumes:
+			- ../search/src:/app/src
+			- ../search/pom.xml:/app/pom.xml
+			- ../search/.mvn:/app/.mvn
+			- ../search/mvnw:/app/mvnw
+			- maven-repo-search:/root/.m2
+		develop:
+			watch:
+				- action: rebuild
+					path: ../search/src
+				- action: rebuild
+					path: ../search/pom.xml
+
+	ms-eureka:
+		volumes:
+			- ../eureka/src:/app/src
+			- ../eureka/pom.xml:/app/pom.xml
+			- ../eureka/.mvn:/app/.mvn
+			- ../eureka/mvnw:/app/mvnw
+			- maven-repo-eureka:/root/.m2
+		develop:
+			watch:
+				- action: rebuild
+					path: ../eureka/src
+				- action: rebuild
+					path: ../eureka/pom.xml
+
+	ms-cloud-gateway:
+		volumes:
+			- ./src:/app/src
+			- ./pom.xml:/app/pom.xml
+			- ./.mvn:/app/.mvn
+			- ./mvnw:/app/mvnw
+			- maven-repo-gateway:/root/.m2
+		develop:
+			watch:
+				- action: rebuild
+					path: ./src
+				- action: rebuild
+					path: ./pom.xml
+
+```
+
+### Comando de arranque en modo watch
+```bash
+docker compose -f cloud-gateway/docker-compose.dev.yml watch
+```
+
+Al guardar un archivo bajo `src` en cualquiera de los servicios:
+1. Compose detecta el cambio y reconstruye la imagen (action: rebuild).
+2. Se recrea el contenedor con el nuevo código.
+3. El endpoint expone la versión actualizada (ejemplo: `/dev/reload-test`).
+
+### Ventajas / Desventajas
+| Ventaja | Desventaja |
+|---------|------------|
+| Garantiza recompilación limpia | Lento si hay muchos módulos |
+| Evita inconsistencias de clases | El rebuild descarga dependencias si cambian poms |
+| Un flujo unificado para todos | Mayor consumo de CPU/IO durante rebuild |
+
+### Alternativa (más rápida)
+Usar bind mounts + compilación local (`./mvnw -q -DskipTests compile`) montando `target/classes` y dejando DevTools reiniciar. Esta opción reduce rebuilds pero requiere compilar fuera del contenedor.
+
 ## Cómo se enlazan los microservicios
 | Servicio | Nombre de contenedor | Función |
 |----------|----------------------|---------|
