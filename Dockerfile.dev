@@ -1,0 +1,9 @@
+FROM eclipse-temurin:24-jdk
+WORKDIR /app
+COPY mvnw mvnw.cmd pom.xml ./
+COPY .mvn .mvn
+RUN ./mvnw -q dependency:go-offline
+ENV SPRING_PROFILES_ACTIVE=dev \
+    MAVEN_OPTS="-Xms256m -Xmx512m"
+EXPOSE 8762
+CMD ["./mvnw","spring-boot:run","-Dspring-boot.run.jvmArguments=-Dspring.devtools.restart.poll-interval=1000 -Dspring.devtools.restart.quiet-period=300"]
