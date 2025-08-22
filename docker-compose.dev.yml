@@ -1,9 +1,8 @@
-version: '3.9' 
 
 services:
-  db: 
+  db:
     image: postgres:16
-    container_name: db 
+    container_name: db
     environment:
       POSTGRES_DB: operator_db
       POSTGRES_USER: postgres
@@ -11,42 +10,67 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - ms-project 
-  
+      - ms-project
+
   ms-operator:
     build:
       context: ./../operator/
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: ms-operator
     env_file:
       - ./../operator/.env
+    volumes:
+      - ../operator/src:/app/src
+      - ../operator/pom.xml:/app/pom.xml
+      - ../operator/.mvn:/app/.mvn
+      - ../operator/mvnw:/app/mvnw
+      - maven-repo-operator:/root/.m2
     ports:
-      - "8082:8082" 
+      - "8082:8082"
     depends_on:
-      - db 
+      - db
       - ms-eureka
     networks:
       - ms-project
-
+    develop:
+      watch:
+        - action: rebuild
+          path: ../operator/src
+        - action: rebuild
+          path: ../operator/pom.xml
 
   ms-search:
     build:
       context: ./../search/
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: ms-search
     env_file:
       - ./../search/.env
+    volumes:
+      - ../search/src:/app/src
+      - ../search/pom.xml:/app/pom.xml
+      - ../search/.mvn:/app/.mvn
+      - ../search/mvnw:/app/mvnw
+      - maven-repo-search:/root/.m2
     ports:
       - "8081:8081"
     networks:
       - ms-project
     depends_on:
       - ms-eureka
-  
+    environment:
+      ES_HOST: http://elasticsearch:9200
+    develop:
+      watch:
+        - action: rebuild
+          path: ../search/src
+        - action: rebuild
+          path: ../search/pom.xml
+
   ms-eureka:
     build:
-      context: ./../eureka/ 
-      dockerfile: Dockerfile
+      context: ./../eureka/
+      dockerfile: Dockerfile.dev
     container_name: ms-eureka
     env_file:
       - ./../eureka/.env
@@ -54,14 +78,31 @@ services:
       - "8761:8761"
     networks:
       - ms-project
+    volumes:
+      - ../eureka/src:/app/src
+      - ../eureka/pom.xml:/app/pom.xml
+      - ../eureka/.mvn:/app/.mvn
+      - ../eureka/mvnw:/app/mvnw
+      - maven-repo-eureka:/root/.m2
+    develop:
+      watch:
+        - action: rebuild
+          path: ../eureka/src
+        - action: rebuild
+          path: ../eureka/pom.xml
 
   ms-cloud-gateway:
     build:
-      context: . 
-      dockerfile: Dockerfile
+      context: .
     container_name: ms-cloud-gateway
     env_file:
-      - .env 
+      - .env
+    volumes:
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml
+      - ./.mvn:/app/.mvn
+      - ./mvnw:/app/mvnw
+      - maven-repo-gateway:/root/.m2
     ports:
       - "8762:8762"
     networks:
@@ -70,7 +111,18 @@ services:
       - ms-eureka
       - ms-search
       - ms-operator
+    develop:
+      watch:
+        - action: rebuild
+          path: ./src
+        - action: rebuild
+          path: ./pom.xml
 
+volumes:
+  maven-repo-search:
+  maven-repo-operator:
+  maven-repo-gateway:
+  maven-repo-eureka:
 
 networks:
   ms-project:
