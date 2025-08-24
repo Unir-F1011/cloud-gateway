@@ -1,0 +1,56 @@
+name: Build & Deploy Operator
+
+on:
+  push:
+    branches: ["main", "dev-miguel"]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  PUBLIC_ECR: true
+  ECR_URI: public.ecr.aws/k1b3s0y0
+  IMAGE_NAME: aws-eureka
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Public ECR
+        if: env.PUBLIC_ECR == 'true'
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Build image
+        run: |
+          docker build -t $ECR_URI/$IMAGE_NAME:latest .
+          docker tag $ECR_URI/$IMAGE_NAME:latest $ECR_URI/$IMAGE_NAME:${{ github.sha }}
+
+      - name: Push image
+        run: |
+          docker push $ECR_URI/$IMAGE_NAME:latest
+          docker push $ECR_URI/$IMAGE_NAME:${{ github.sha }}
+
+      - name: Deploy (pull & restart only this service)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: ECR_URI,IMAGE_NAME
+          script: |
+            cd /opt/microservices
+            aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+            docker compose pull $IMAGE_NAME
+            docker compose up -d $IMAGE_NAME
+            docker image prune -f
