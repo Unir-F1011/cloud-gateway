@@ -19,6 +19,13 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
+      routes:
+        - id: eureka-ui
+          uri: http://aws-eureka:8761
+          predicates:
+            - Path=/eureka/**
+          filters:
+            - StripPrefix=1
 
 management:
   endpoint:
