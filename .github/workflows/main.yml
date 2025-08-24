@@ -2,7 +2,9 @@ name: Build & Deploy Cloud-gateway
 
 on:
   push:
-    branches: ["main", "dev-miguel"]
+    branches: ["master", "developer", "dev-miguel"]
+  pull_request:
+    branches: ["master", "developer", "dev-miguel"]
   workflow_dispatch:
 
 env:
