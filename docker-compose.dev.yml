@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:16
@@ -25,8 +24,8 @@ services:
       - ../operator/.mvn:/app/.mvn
       - ../operator/mvnw:/app/mvnw
       - maven-repo-operator:/root/.m2
-    ports:
-      - "8082:8082"
+    expose:
+      - "8082"
     depends_on:
       - db
       - ms-eureka
@@ -38,6 +37,8 @@ services:
           path: ../operator/src
         - action: rebuild
           path: ../operator/pom.xml
+        - action: rebuild
+          path: ../operator/.env
 
   ms-search:
     build:
@@ -52,8 +53,8 @@ services:
       - ../search/.mvn:/app/.mvn
       - ../search/mvnw:/app/mvnw
       - maven-repo-search:/root/.m2
-    ports:
-      - "8081:8081"
+    expose:
+      - "8081"
     networks:
       - ms-project
     depends_on:
@@ -66,6 +67,8 @@ services:
           path: ../search/src
         - action: rebuild
           path: ../search/pom.xml
+        - action: rebuild
+          path: ../search/.env
 
   ms-eureka:
     build:
@@ -90,6 +93,8 @@ services:
           path: ../eureka/src
         - action: rebuild
           path: ../eureka/pom.xml
+        - action: rebuild
+          path: ../eureka/.env
 
   ms-cloud-gateway:
     build:
@@ -117,6 +122,8 @@ services:
           path: ./src
         - action: rebuild
           path: ./pom.xml
+        - action: rebuild
+          path: ./.env
 
 volumes:
   maven-repo-search:
