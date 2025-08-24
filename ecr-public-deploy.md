@@ -23,39 +23,39 @@ Tu archivo `docker-compose.yml` necesita ser actualizado para usar las URIs púb
 ```yaml
 version: '3.9'
 services:
-  eureka:
+  aws-eureka:
     image: public.ecr.aws/k1b3s0y0/aws-eureka:latest
     env_file: ./env/eureka.env
     restart: unless-stopped
     networks:
       - ms-network
     
-  operator:
+  aws-operator:
     image: public.ecr.aws/k1b3s0y0/aws-operator:latest
     env_file: ./env/operator.env
     depends_on:
-      - eureka
+      - aws-eureka
       - db
     restart: unless-stopped
     networks:
       - ms-network
     
-  search:
+  aws-search:
     image: public.ecr.aws/k1b3s0y0/aws-search:latest
     env_file: ./env/search.env
     depends_on:
-      - eureka
+      - aws-eureka
     restart: unless-stopped
     networks:
       - ms-network
     
-  cloud-gateway:
+  aws-cloud-gateway:
     image: public.ecr.aws/k1b3s0y0/aws-cloud-gateway:latest
     env_file: ./env/gateway.env
     depends_on:
-      - eureka
-      - operator
-      - search
+      - aws-eureka
+      - aws-operator
+      - aws-search
     ports:
       - "8762:8762"
     restart: unless-stopped
@@ -269,7 +269,7 @@ Actualmente tenemos desplegado el sistema en una instancia EC2 en AWS con los si
 | Nombre | microservices-host |
 | Tipo | t3.micro |
 | AMI | Ubuntu Noble 24.04 (ami-0360c520857e3138f) |
-| IP Pública | 54.174.115.203 |
+| IP Pública | 54.152.94.55 |
 | DNS Público | ec2-54-174-115-203.compute-1.amazonaws.com |
 | IP Privada | 172.31.35.238 |
 | VPC ID | vpc-05239e9c8f0ca36aa |
@@ -295,17 +295,17 @@ Los siguientes endpoints están disponibles en la instancia de producción:
 
 | Servicio | URL | Descripción |
 |----------|-----|-------------|
-| Cloud Gateway | http://54.174.115.203:8762 | Puerta de enlace API principal |
-| Cloud Gateway (DNS) | http://ec2-54-174-115-203.compute-1.amazonaws.com:8762 | Acceso vía DNS |
-| Eureka Dashboard | http://54.174.115.203:8762/eureka/web | Registro y descubrimiento de servicios (a través del gateway) |
-| Health Check | http://54.174.115.203:8762/actuator/health | Comprobación de estado del sistema |
+| Cloud Gateway | http://54.152.94.55:8762 | Puerta de enlace API principal |
+| Cloud Gateway (DNS) | http://ec2-54-152-94-55.compute-1.amazonaws.com:8762 | Acceso vía DNS |
+| Eureka Dashboard | http://54.152.94.55:8762/eureka/web | Registro y descubrimiento de servicios (a través del gateway) |
+| Health Check | http://54.152.94.55:8762/actuator/health | Comprobación de estado del sistema |
 
 ### Acceso y Monitoreo
 
 Para acceder al servidor:
 
 ```bash
-ssh -i deploy-key.pem ubuntu@54.174.115.203
+ssh -i deploy-key.pem ubuntu@54.152.94.55
 ```
 
 Para monitorear los logs en tiempo real:
