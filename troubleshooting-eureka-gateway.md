@@ -39,7 +39,7 @@ Donde `serviceId` = `spring.application.name` (en minúsculas).
 
 Por tanto, la UI de Eureka estaría en:
 ```
-http://54.152.94.55:8762/aws-eureka/
+http://54.152.94.55:8761/
 ```
 No en `/eureka/`.
 
