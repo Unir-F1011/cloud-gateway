@@ -22,7 +22,7 @@ spring:
 management:
   endpoint:
     gateway:
-      access: ${ROUTE_TABLES_ACCESS:enabled}
+      access: ${ROUTE_TABLES_ACCESS:PUBLIC}
   endpoints:
     web:
       exposure:
