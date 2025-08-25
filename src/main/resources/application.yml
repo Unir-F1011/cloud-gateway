@@ -14,15 +14,16 @@ spring:
           "[/**]":
             # Permitir SOLO los orígenes definidos en ALLOWED_ORIGINS.
             # Fallback seguro mientras desarrollas con Docker (front en 5050) o Vite (3000).
-            allowedOrigins: ${ALLOWED_ORIGINS:http://localhost:5050,http://localhost:3000,http://ec2-54-152-94-55.compute-1.amazonaws.com:8762}
+            allowedOrigins: ${ALLOWED_ORIGINS:http://localhost:5050,http://localhost:3000}
             allowedMethods: [GET, POST, PUT, DELETE, PATCH, OPTIONS]
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
+
 management:
   endpoint:
     gateway:
-      access: ${ROUTE_TABLES_ACCESS:PUBLIC}
+      enabled: ${ROUTE_TABLES_ENABLED:true}
   endpoints:
     web:
       exposure:
